@@ -1,0 +1,358 @@
+
+/* =====================================
+   MINIMUNDO AI STUDIO
+   Leo, Coco y Dumbo
+   ===================================== */
+
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+const characters = {
+  leo: {
+    name: "Leo",
+    emoji: "🦁",
+    description: "Valiente, cariñoso y aventurero."
+  },
+  coco: {
+    name: "Coco",
+    emoji: "🐵",
+    description: "Divertido, inteligente y travieso."
+  },
+  dumbo: {
+    name: "Dumbo",
+    emoji: "🐘",
+    description: "Un elefantito curioso y adorable."
+  }
+};
+
+let projects = JSON.parse(
+  localStorage.getItem("minimundo_projects") || "[]"
+);
+
+/* NAVEGACIÓN */
+
+function navigateTo(page) {
+  const target = document.getElementById(page);
+  if (!target) return;
+
+  $$(".page, [data-page]").forEach(section => {
+    section.classList.remove("active");
+  });
+
+  target.classList.add("active");
+
+  $$("[data-page-link]").forEach(link => {
+    link.classList.toggle(
+      "active",
+      link.dataset.pageLink === page
+    );
+  });
+
+  window.location.hash = page;
+}
+
+$$("[data-page-link]").forEach(link => {
+  link.addEventListener("click", event => {
+    event.preventDefault();
+    navigateTo(link.dataset.pageLink);
+  });
+});
+
+/* PERSONAJES */
+
+function getSelectedCharacters() {
+  const selected = $$(
+    'input[name="characters"]:checked, input[name="cast"]:checked'
+  );
+
+  if (selected.length) {
+    return selected.map(input =>
+      input.value.toLowerCase()
+    );
+  }
+
+  return ["leo", "coco", "dumbo"];
+}
+
+function showCharacters() {
+  const container = $("#characters-list");
+  if (!container) return;
+
+  container.innerHTML = Object.values(characters)
+    .map(character => `
+      <div class="character-card">
+        <div class="character-emoji">${character.emoji}</div>
+        <h3>${character.name}</h3>
+        <p>${character.description}</p>
+      </div>
+    `).join("");
+}
+
+/* CREACIÓN DE HISTORIAS */
+
+function createStory(idea, cast) {
+  const names = cast
+    .map(name => characters[name]?.name)
+    .filter(Boolean);
+
+  const protagonists = names.join(", ");
+
+  return `
+Título: ${idea}
+
+Una nueva aventura de MiniMundo.
+
+Narrador:
+En un lugar lleno de magia y diversión,
+${protagonists} estaban preparados para vivir
+una aventura inolvidable.
+
+Leo:
+¡Amigos! Hoy tenemos una misión especial.
+
+Coco:
+¡Espero que sea divertida! ¡Ja, ja!
+
+Dumbo:
+¡Yo también quiero participar!
+
+Narrador:
+Los tres amigos decidieron trabajar juntos.
+Aunque surgieron algunos problemas, descubrieron
+que ayudándose podían conseguir cualquier cosa.
+
+Leo:
+¡Nunca debemos rendirnos!
+
+Coco:
+¡Y nunca debemos dejar de sonreír!
+
+Dumbo:
+¡Porque juntos somos un gran equipo!
+
+Narrador:
+Y así terminó otra increíble aventura
+de Leo, Coco y Dumbo.
+
+FIN.
+  `.trim();
+}
+
+function getField(selectors, fallback = "") {
+  for (const selector of selectors) {
+    const element = $(selector);
+    if (element && element.value) return element.value;
+  }
+  return fallback;
+}
+
+function generateStory() {
+  const idea = getField(
+    ["#idea", "#video-idea", "#prompt", '[name="idea"]'],
+    "Una aventura mágica"
+  );
+
+  const cast = getSelectedCharacters();
+  const story = createStory(idea, cast);
+
+  const output = $(
+    "#story-output, #generated-story, [data-story-output]"
+  );
+
+  if (output) {
+    output.textContent = story;
+    output.classList.add("active");
+  } else {
+    alert(story);
+  }
+
+  return story;
+}
+
+/* GUARDAR PROYECTOS */
+
+function saveProject(title, content) {
+  const project = {
+    id: Date.now(),
+    title,
+    content,
+    date: new Date().toLocaleString("es-ES")
+  };
+
+  projects.unshift(project);
+
+  localStorage.setItem(
+    "minimundo_projects",
+    JSON.stringify(projects)
+  );
+
+  renderProjects();
+}
+
+function renderProjects() {
+  const container = $(
+    "#projects-list, #my-projects, [data-projects]"
+  );
+
+  if (!container) return;
+
+  if (!projects.length) {
+    container.innerHTML =
+      "<p>Todavía no tienes proyectos guardados.</p>";
+    return;
+  }
+
+  container.innerHTML = projects.map(project => `
+    <article class="project-card">
+      <h3>${escapeHTML(project.title)}</h3>
+      <small>${escapeHTML(project.date)}</small>
+      <button data-open-project="${project.id}">
+        Abrir proyecto
+      </button>
+      <button data-delete-project="${project.id}">
+        Eliminar
+      </button>
+    </article>
+  `).join("");
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
+
+document.addEventListener("click", event => {
+  const openButton = event.target.closest("[data-open-project]");
+  const deleteButton = event.target.closest("[data-delete-project]");
+
+  if (openButton) {
+    const project = projects.find(
+      item => item.id === Number(openButton.dataset.openProject)
+    );
+
+    if (project) {
+      const output = $("#story-output, #generated-story");
+      if (output) output.textContent = project.content;
+      else alert(project.content);
+    }
+  }
+
+  if (deleteButton) {
+    const id = Number(deleteButton.dataset.deleteProject);
+
+    projects = projects.filter(item => item.id !== id);
+
+    localStorage.setItem(
+      "minimundo_projects",
+      JSON.stringify(projects)
+    );
+
+    renderProjects();
+  }
+});
+
+/* VOZ EN ESPAÑOL */
+
+function speak(text, character = "leo") {
+  if (!("speechSynthesis" in window)) {
+    alert("Tu navegador no admite la función de voz.");
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const voice = new SpeechSynthesisUtterance(text);
+  voice.lang = "es-ES";
+  voice.rate = 0.95;
+  voice.pitch = character === "coco" ? 1.2 : 1;
+
+  const voices = window.speechSynthesis.getVoices();
+  const spanishVoice = voices.find(item =>
+    item.lang.toLowerCase().startsWith("es")
+  );
+
+  if (spanishVoice) voice.voice = spanishVoice;
+
+  window.speechSynthesis.speak(voice);
+}
+
+/* BOTONES */
+
+document.addEventListener("click", event => {
+  const button = event.target.closest("button");
+  if (!button) return;
+
+  const text = button.textContent.toLowerCase();
+
+  if (
+    button.matches("#generate-story, #create-story, [data-generate-story]") ||
+    text.includes("crear historia")
+  ) {
+    const story = generateStory();
+
+    const title = getField(
+      ["#idea", "#video-idea", "#prompt", '[name="idea"]'],
+      "Mi aventura de MiniMundo"
+    );
+
+    saveProject(title, story);
+  }
+
+  if (
+    button.matches("#speak-story, [data-speak-story]") ||
+    text.includes("escuchar")
+  ) {
+    const output = $("#story-output, #generated-story");
+    if (output) speak(output.textContent);
+  }
+
+  if (
+    button.matches("#stop-voice, [data-stop-voice]") ||
+    text.includes("detener voz")
+  ) {
+    window.speechSynthesis?.cancel();
+  }
+});
+
+/* GENERACIÓN DE VÍDEO */
+
+function showVideoNotice() {
+  alert(
+    "La generación real de vídeos con IA necesita conectar " +
+    "un proveedor externo. Esta versión todavía no genera MP4."
+  );
+}
+
+$$("[data-generate-video], #generate-video").forEach(button => {
+  button.addEventListener("click", showVideoNotice);
+});
+
+/* INICIO */
+
+document.addEventListener("DOMContentLoaded", () => {
+  showCharacters();
+  renderProjects();
+
+  const initialPage = window.location.hash.replace("#", "");
+
+  if (initialPage && document.getElementById(initialPage)) {
+    navigateTo(initialPage);
+  }
+});
+
+/* REGISTRO PWA */
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(error => {
+        console.warn("No se pudo registrar la PWA:", error);
+      });
+  });
+}
+  
