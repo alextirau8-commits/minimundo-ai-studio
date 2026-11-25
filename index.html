@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#7462d5">
+  <meta name="description" content="MiniMundo AI Studio: crea historias y aventuras infantiles con Leo, Coco y Dumbo.">
+  <title>MiniMundo AI Studio</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h2>🌈 MiniMundo</h2>
+      <p>AI STUDIO</p>
+      <nav>
+        <a href="#inicio" data-page-link="inicio">🏠 Inicio</a>
+        <a href="#generador" data-page-link="generador">🎬 Generar vídeo</a>
+        <a href="#historias" data-page-link="historias">📚 Historias</a>
+        <a href="#personajes" data-page-link="personajes">⭐ Personajes</a>
+        <a href="#proyectos" data-page-link="proyectos">💾 Mis proyectos</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <section id="inicio" class="page active">
+        <h1>¡Bienvenido a MiniMundo!</h1>
+        <p>Crea aventuras mágicas con tus personajes favoritos.</p>
+        <div class="hero">
+          <div class="hero-characters">
+            <span>🦁</span><span>🐵</span><span>🐘</span>
+          </div>
+          <h2>Leo, Coco y Dumbo</h2>
+          <p>¡Tres amigos, infinitas aventuras!</p>
+          <button data-page-link="generador">Crear mi aventura ✨</button>
+        </div>
+        <h2>Nuestros protagonistas</h2>
+        <div id="characters-list" class="character-grid"></div>
+      </section>
+
+      <section id="generador" class="page">
+        <h1>🎬 Crea tu aventura</h1>
+        <p>Describe la historia que quieres imaginar.</p>
+
+        <label for="idea">¿De qué tratará tu aventura?</label>
+        <textarea id="idea" placeholder="Ejemplo: Leo, Coco y Dumbo encuentran un tesoro escondido..."></textarea>
+
+        <h3>Elige a los protagonistas</h3>
+        <label><input type="checkbox" name="characters" value="leo" checked> 🦁 Leo</label>
+        <label><input type="checkbox" name="characters" value="coco" checked> 🐵 Coco</label>
+        <label><input type="checkbox" name="characters" value="dumbo" checked> 🐘 Dumbo</label>
+
+        <h3>Duración</h3>
+        <select id="duration">
+          <option value="1">1 minuto</option>
+          <option value="3">3 minutos</option>
+          <option value="5">5 minutos</option>
+          <option value="10">10 minutos</option>
+        </select>
+
+        <h3>Formato</h3>
+        <select id="format">
+          <option value="16:9">Horizontal 16:9</option>
+          <option value="9:16">Vertical 9:16</option>
+        </select>
+
+        <h3>Estilo visual</h3>
+        <select id="style">
+          <option>Animación infantil 3D original</option>
+          <option>Cuento ilustrado</option>
+          <option>Acuarela</option>
+        </select>
+
+        <button id="create-story">✨ Crear historia</button>
+        <button id="generate-video">🎥 Generar vídeo</button>
+
+        <div id="story-output" class="story-output"></div>
+        <button id="speak-story">🔊 Escuchar historia</button>
+        <button id="stop-voice">⏹ Detener voz</button>
+      </section>
+
+      <section id="historias" class="page">
+        <h1>📚 Mis historias</h1>
+        <p>¡Aquí podrás crear y guardar tus cuentos!</p>
+      </section>
+
+      <section id="personajes" class="page">
+        <h1>⭐ Nuestros personajes</h1>
+        <div id="characters-list"></div>
+      </section>
+
+      <section id="proyectos" class="page">
+        <h1>💾 Mis proyectos</h1>
+        <div id="projects-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
